@@ -42,17 +42,20 @@ router.post('/login', async (req, res) => {
 
   //check if user exists
   const user = await User.findOne({email: req.body.email});
-  if(!user) return res.status(400).send('Email or password is wrong');
+  if(!user){
+    res.status(400).send('Email or password is wrong');
+    return;
+  } 
 
   //password is correct
   const validPass = await bcrypt.compare(req.body.password, user.password);
   if(!validPass) return res.status(400).send('Password is wrong');
 
   //Create and assign token
-  const token = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET);
+  const token = jwt.sign({_id: user._id,name: user.name, email: user.email}, process.env.TOKEN_SECRET);
   res.header('auth-token', token).send(token);
 
-  res.send('Logged in!')
+  
 })
 
 module.exports = router;
